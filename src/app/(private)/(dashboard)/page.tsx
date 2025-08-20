@@ -162,9 +162,16 @@ export default function Dashboard() {
     )
   }
 
+  // if (!accessToken) {
+  //   return <AuthModal onAuthenticated={() => window.location.reload()} />
+  // }
   if (!accessToken) {
-    return <AuthModal onAuthenticated={() => window.location.reload()} />
-  }
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <p className="text-gray-600">Nenhum token encontrado. Configure seu acesso.</p>
+    </div>
+  )
+}
 
   return (
     <SidebarProvider>

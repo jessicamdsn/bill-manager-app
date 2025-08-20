@@ -38,6 +38,8 @@ export async function registerUser(userData: {
   const data = await response.json();
   return data; // objeto do usuário com access_token, aplication, roles etc
 }
+
+
 export async function loginWithToken(token: string) {
   const res = await fetch("/api/auth/token", {
     method: "POST",
