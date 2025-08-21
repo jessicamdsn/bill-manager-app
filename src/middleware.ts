@@ -22,7 +22,7 @@ export function middleware(request: NextRequest) {
   }
   if (authToken && publicRoute && publicRoute.whenAuthenticated === 'redirect') {
     const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/dashboard'
+    redirectUrl.pathname = '/'
     return NextResponse.redirect(redirectUrl)
   }
   if (authToken && !publicRoute) {
