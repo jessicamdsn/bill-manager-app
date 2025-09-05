@@ -12,7 +12,8 @@ export interface Expense {
   status: string
   repeat?: number
 }
-
+const API_AUTH = process.env.NEXT_PUBLIC_API_AUTH;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 export async function registerUser(userData: {
   name: string;
   email: string;
@@ -22,7 +23,7 @@ export async function registerUser(userData: {
     ...userData,
     aplication: "bill-manager"
   };
-  const response = await fetch("api/proxy/auth/signup", {
+  const response = await fetch(`${API_AUTH}/auth/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -52,7 +53,7 @@ export async function loginWithToken(token: string) {
 }
 
 export async function loginWithEmailAndPassword(email: string, password: string) {
-  const res = await fetch("/api/proxy/auth/signin", {
+  const res = await fetch(`${API_AUTH}/auth/signin`, {
     method: "POST",
     body: JSON.stringify({ email, password }),
     headers: { "Content-Type": "application/json" },
@@ -64,7 +65,7 @@ export async function loginWithEmailAndPassword(email: string, password: string)
 
 
 export async function authorizeToken(token: string) {
-  const res = await fetch("/api/proxy/users/authorization", {
+  const res = await fetch(`${API_AUTH}/users/authorization`, {
     headers: { Authorization: token },
   });
   if (!res.ok) throw new Error("Token inválido");
@@ -73,7 +74,7 @@ export async function authorizeToken(token: string) {
 }
 
 export async function confirmPayment(expenseId: number, token: string): Promise<Expense> {
-  const url = `/api/proxy/payment/confirm-paymeny/${expenseId}`
+  const url = `${API_BASE}/payment/confirm-paymeny/${expenseId}`
   const response = await fetch(url, {
     method: "PUT",
     headers: {
@@ -90,11 +91,12 @@ export async function getSumary(date: Date, token: string): Promise<Sumary> {
   const start = format(startOfMonth(date), "dd-MM-yyyy")
   const finish = format(endOfMonth(date), "dd-MM-yyyy")
   const params = new URLSearchParams({ start, finsh: finish })
-  const url = `/api/proxy/payment/sumary?${params.toString()}`
+  const url = `${API_BASE}/payment/sumary?${params.toString()}`
 
   const res = await fetch(url, {
-    headers: { Authorization: token },
-  })
+  headers: { Authorization: `Bearer ${token}` },
+})
+
   if (!res.ok) throw new Error("Erro ao buscar resumo")
   return res.json()
 }
@@ -103,7 +105,7 @@ export async function getPayments(date: Date, token: string): Promise<AdaptedExp
   const start = format(startOfMonth(date), "dd-MM-yyyy")
   const finish = format(endOfMonth(date), "dd-MM-yyyy")
   const params = new URLSearchParams({ start, finsh: finish })
-  const url = `/api/proxy/payment?${params.toString()}`
+  const url = `${API_BASE}/payment?${params.toString()}`
 
   const res = await fetch(url, {
     headers: { Authorization: token },
@@ -114,7 +116,7 @@ export async function getPayments(date: Date, token: string): Promise<AdaptedExp
 }
 
 export async function health(token: string): Promise<void> {
-  const url = "/api/proxy/payment/health"
+  const url = `${API_BASE}/payment/health`
   const res = await fetch(url, {
     headers: { Authorization: token },
   })
@@ -123,7 +125,7 @@ export async function health(token: string): Promise<void> {
 }
 
 export async function updateExpense(id: number, expense: ExpensePayload, token: string): Promise<Expense> {
-  const response = await fetch(`/api/proxy/payment/${id}`, {
+  const response = await fetch(`${API_BASE}/payment/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -140,7 +142,7 @@ export async function updateExpense(id: number, expense: ExpensePayload, token: 
 
 export async function createExpense(expense: ExpensePayload, token: string): Promise<Expense> {
   const repeat = expense.periodicity ?? 1
-  const response = await fetch(`/api/proxy/payment/repeat/${repeat}`, {
+  const response = await fetch(`${API_BASE}/payment/repeat/${repeat}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -156,7 +158,7 @@ export async function createExpense(expense: ExpensePayload, token: string): Pro
 }
 
 export async function deleteExpense(expenseId: number, token: string): Promise<void> {
-  const url = `/api/proxy/payment/${expenseId}`
+  const url = `${API_BASE}/payment/${expenseId}`
   const response = await fetch(url, {
     method: "DELETE",
     headers: {

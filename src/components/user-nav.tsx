@@ -13,17 +13,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/src/components/ui/dropdown-menu"
+import Cookies from 'js-cookie'
+
 
 export function UserNav() {
   const name = localStorage.getItem("userName") || "Usuário";
   const email = localStorage.getItem("userEmail") || "sem@email.com";
 
-  function handleLogout() {
-    localStorage.removeItem("accessToken");
+  async function handleLogout() {
+    // Limpa localStorage
+    localStorage.removeItem("jwtToken"); 
     localStorage.removeItem("userName");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userApplication");
-    window.location.reload();
+
+    // Remove cookie (certifique-se do path)
+    Cookies.remove("token", { path: "/" });
+
+    // Também remove via API (para httpOnly ou segurança extra)
+    await fetch("/api/set-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: null }),
+    });
+
+    // Redireciona para rota pública
+    window.location.href = "/register";
   }
 
   return (

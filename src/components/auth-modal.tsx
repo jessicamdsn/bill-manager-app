@@ -1,11 +1,14 @@
-"use client";
+'use client'
 import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog"
 import { Input } from "@/src/components/ui/input"
 import { Button } from "@/src/components/ui/button"
 import { authorizeToken, loginWithEmailAndPassword, registerUser } from "@/src/lib/api"
+import Cookies from 'js-cookie'
+import { useRouter } from 'next/navigation'
 
 export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => void }) {
+  const router = useRouter()
   const [emailOrToken, setEmailOrToken] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
@@ -27,19 +30,36 @@ export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => 
           return
         }
         data = await registerUser({ name, email: emailOrToken, password })
-        token = data.access_token
+        token = data.jwt
+        if (!token) {
+          const loginData = await loginWithEmailAndPassword(emailOrToken, password);
+          token = loginData.jwt;
+        }
+
       } else {
-        data = await authorizeToken(emailOrToken)
-        token = data.access_token
+        data = await loginWithEmailAndPassword(emailOrToken, password);
+        token = data.jwt
       }
+      console.log(token)
 
       if (token) {
-        localStorage.setItem("accessToken", token)
-        localStorage.setItem("userName", data.name || "")
-        localStorage.setItem("userEmail", data.email || "")
-        localStorage.setItem("userApplication", data.aplication || "")
-        onAuthenticated()
+        localStorage.setItem("jwtToken", token);
+        localStorage.setItem("userName", data.name || "");
+        localStorage.setItem("userEmail", data.email || "");
+
+        await fetch("/api/set-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        });
+
+        onAuthenticated();
+
+        router.push("/");
+      } else {
+        alert("Erro ao autenticar: token não retornado.");
       }
+
     } catch {
       alert("Credenciais inválidas")
     } finally {

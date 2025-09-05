@@ -29,12 +29,6 @@ import type { AdaptedExpenses } from "@/src/types/payments"
 import type { Sumary } from "@/src/types/sumary"
 
 export default function Dashboard() {
-  // Autenticação
-  const [accessToken, setAccessToken] = useState<string | null>(null)
-  const [isAuthenticating, setIsAuthenticating] = useState(true)
-  const [authError, setAuthError] = useState<string | null>(null)
-
-  // Dados dashboard
   const [expenses, setExpenses] = useState<AdaptedExpenses[]>([])
   const [sumary, setSumary] = useState<Sumary>()
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false)
@@ -49,59 +43,25 @@ export default function Dashboard() {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
   const [deleteId, setDeleteId] = useState<number | null>(null)
 
-  // Campos do modal
-  const [inputToken, setInputToken] = useState("")
-  const [useTokenLogin, setUseTokenLogin] = useState(true)
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // Tenta pegar token do localStorage ao montar
-    const token = localStorage.getItem("accessToken")
-    if (token) {
-      validateToken(token)
-      setAccessToken(token)
-    } else {
-      setIsAuthenticating(false)
-    }
+    const jwt = localStorage.getItem("jwtToken");
+    if (jwt) setToken(jwt);
   }, [])
 
-  async function validateToken(token: string) {
-    setIsAuthenticating(true)
-    setAuthError(null)
-    try {
-      const data = await authorizeToken(token)
-      setAccessToken(data.access_token)
-      localStorage.setItem("accessToken", data.access_token)
-      localStorage.setItem("userName", data.name)
-      localStorage.setItem("userEmail", data.email)
-      localStorage.setItem("userApplication", data.aplication)
-    } catch (err) {
-      setAuthError("Token inválido ou expirado")
-      setAccessToken(null)
-      localStorage.removeItem("accessToken")
-      localStorage.removeItem("userName")
-      localStorage.removeItem("userEmail")
-      localStorage.removeItem("userApplication")
-    } finally {
-      setIsAuthenticating(false)
-    }
-  }
 
-  async function onSubmitToken() {
-    if (!inputToken.trim()) return
-    await validateToken(inputToken.trim())
-  }
-
-  // Funções dashboard que usam o token
   const reloadData = async (date: Date = calendarDate) => {
-    if (!accessToken) return
-    setSumary(await getSumary(date, accessToken))
-    const paymentsData = await getPayments(date, accessToken)
+    if (!token) return
+    setSumary(await getSumary(date, token))
+    const paymentsData = await getPayments(date, token)
     setExpenses(paymentsData)
   }
 
   useEffect(() => {
-    if (accessToken) reloadData()
-  }, [calendarDate, accessToken])
+    if (token) reloadData()
+  }, [calendarDate, token])
+
 
   // Funções auxiliares
   const toggleDateExpansion = (date: string) => {
@@ -165,13 +125,13 @@ export default function Dashboard() {
   // if (!accessToken) {
   //   return <AuthModal onAuthenticated={() => window.location.reload()} />
   // }
-  if (!accessToken) {
-  return (
-    <div className="flex h-screen items-center justify-center">
-      <p className="text-gray-600">Nenhum token encontrado. Configure seu acesso.</p>
-    </div>
-  )
-}
+  //   if (!token) {
+  //   return (
+  //     <div className="flex h-screen items-center justify-center">
+  //       <p className="text-gray-600">Nenhum token encontrado. Configure seu acesso.</p>
+  //     </div>
+  //   )
+  // }
 
   return (
     <SidebarProvider>
@@ -349,7 +309,7 @@ export default function Dashboard() {
                     <CalendarWidget
                       expenses={expenses}
                       onMonthChange={async (date) => {
-                        const data = await getPayments(date, accessToken)
+                        const data = await getPayments(date, token!)
                         setExpenses(data)
                         setCalendarDate(date)
                       }}
@@ -381,7 +341,7 @@ export default function Dashboard() {
         }}
         onConfirm={async () => {
           if (deleteId !== null) {
-            await deleteExpense(deleteId, accessToken)
+            await deleteExpense(deleteId, token!)
             setIsConfirmDeleteOpen(false)
             setDeleteId(null)
             await reloadData()
