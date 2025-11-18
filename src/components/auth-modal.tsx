@@ -3,6 +3,7 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog"
 import { Input } from "@/src/components/ui/input"
 import { Button } from "@/src/components/ui/button"
+import Image from "next/image";
 import { authorizeToken, loginWithEmailAndPassword, registerUser } from "@/src/lib/api"
 import Cookies from 'js-cookie'
 import { useRouter } from 'next/navigation'
@@ -88,7 +89,7 @@ export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => 
               autoComplete="new-password"
             />
 
-            <Button onClick={handleSubmit} className="w-full bg-[#20A968]" disabled={loading}>
+            <Button onClick={handleSubmit} className="w-full " disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}
             </Button>
 
@@ -103,7 +104,13 @@ export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => 
                 onClick={() => alert("Login com Google")}
                 className="flex items-center justify-center gap-2 border border-gray-300 rounded-md px-4 py-2 hover:bg-gray-100 transition"
               >
-                <img src="/google-logo.png" alt="Google" className="w-5 h-5" />
+                <Image
+                  src="/google-logo.png"
+                  alt="Google"
+                  width={20}
+                  height={20}
+                  className="w-5 h-5"
+                />
                 <span className="text-sm">Entrar com Google</span>
               </button>
 
@@ -118,7 +125,7 @@ export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => 
             <Button
               variant="link"
               onClick={() => setIsRegistering(!isRegistering)}
-              className="w-full text-center text-[#20A968]"
+              className="w-full text-center text-[#4e4e4e]"
             >Não tem conta? Cadastre-se
             </Button>
 
@@ -148,7 +155,7 @@ export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => 
               autoComplete="new-password"
             />
 
-            <Button onClick={handleSubmit} className="w-full bg-[#20A968]" disabled={loading}>
+            <Button onClick={handleSubmit} className="w-full " disabled={loading}>
               {loading ? "Registrando..." : "Registrar"}
             </Button>
 
@@ -179,14 +186,14 @@ export default function AuthModal({ onAuthenticated }: { onAuthenticated: () => 
             <Button
               variant="link"
               onClick={() => setIsRegistering(!isRegistering)}
-              className="w-full text-center text-[#20A968]"
+              className="w-full text-center text-[#4e4e4e]"
             >Já tem conta? Entre
             </Button>
           </div>
         </div>
 
         <div className={`
-          absolute top-0 h-full w-1/2 bg-[#20A968] text-white flex flex-col items-center justify-center
+          absolute top-0 h-full w-1/2 bg-[#0c0c0c] text-white flex flex-col items-center justify-center
           transition-transform duration-500 z-10 rounded-xl gap-20
           ${isRegistering ? 'translate-x-0 left-0' : 'translate-x-full left-0'}
         `}>

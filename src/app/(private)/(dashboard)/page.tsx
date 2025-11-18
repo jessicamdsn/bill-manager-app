@@ -53,7 +53,7 @@ export default function Dashboard() {
 
   const reloadData = async (date: Date = calendarDate) => {
     if (!token) return
-    setSumary(await getSumary(date, token))
+    setSumary(await getSumary(date))
     const paymentsData = await getPayments(date, token)
     setExpenses(paymentsData)
   }

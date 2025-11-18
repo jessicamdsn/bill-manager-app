@@ -14,6 +14,17 @@ export interface Expense {
 }
 const API_AUTH = process.env.NEXT_PUBLIC_API_AUTH;
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+// const jwtToken = localStorage.getItem('jwtToken')
+
+function getAuthHeaders() {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('jwtToken') : null;
+  
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+}
+
 export async function registerUser(userData: {
   name: string;
   email: string;
@@ -66,7 +77,7 @@ export async function loginWithEmailAndPassword(email: string, password: string)
 
 export async function authorizeToken(token: string) {
   const res = await fetch(`${API_AUTH}/users/authorization`, {
-    headers: { Authorization: token },
+    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Token inválido");
 
@@ -75,11 +86,12 @@ export async function authorizeToken(token: string) {
 
 export async function confirmPayment(expenseId: number, token: string): Promise<Expense> {
   const url = `${API_BASE}/payment/confirm-paymeny/${expenseId}`
+  const jwtToken = localStorage.getItem('jwtToken') || "";
   const response = await fetch(url, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Authorization: `Bearer ${jwtToken}`,
     },
   })
   if (!response.ok) throw new Error("Erro ao confirmar pagamento.")
@@ -87,15 +99,14 @@ export async function confirmPayment(expenseId: number, token: string): Promise<
   return data.payment
 }
 
-export async function getSumary(date: Date, token: string): Promise<Sumary> {
+export async function getSumary(date: Date): Promise<Sumary> {
   const start = format(startOfMonth(date), "dd-MM-yyyy")
   const finish = format(endOfMonth(date), "dd-MM-yyyy")
   const params = new URLSearchParams({ start, finsh: finish })
   const url = `${API_BASE}/payment/sumary?${params.toString()}`
-
   const res = await fetch(url, {
-  headers: { Authorization: `Bearer ${token}` },
-})
+    headers: getAuthHeaders(),
+  })
 
   if (!res.ok) throw new Error("Erro ao buscar resumo")
   return res.json()
@@ -108,7 +119,7 @@ export async function getPayments(date: Date, token: string): Promise<AdaptedExp
   const url = `${API_BASE}/payment?${params.toString()}`
 
   const res = await fetch(url, {
-    headers: { Authorization: token },
+    headers: getAuthHeaders(),
   })
   if (!res.ok) throw new Error("Erro ao buscar pagamentos")
   const json = await res.json()
@@ -118,18 +129,19 @@ export async function getPayments(date: Date, token: string): Promise<AdaptedExp
 export async function health(token: string): Promise<void> {
   const url = `${API_BASE}/payment/health`
   const res = await fetch(url, {
-    headers: { Authorization: token },
+    headers: getAuthHeaders(),
   })
   const json = await res.json()
   alert(`RESPOSTA: ${JSON.stringify(json.response)}`)
 }
 
 export async function updateExpense(id: number, expense: ExpensePayload, token: string): Promise<Expense> {
+  const jwtToken = localStorage.getItem('jwtToken') || "";
   const response = await fetch(`${API_BASE}/payment/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Authorization: `Bearer ${jwtToken}`,
     },
     body: JSON.stringify(expense),
   })
@@ -141,12 +153,13 @@ export async function updateExpense(id: number, expense: ExpensePayload, token: 
 }
 
 export async function createExpense(expense: ExpensePayload, token: string): Promise<Expense> {
+  const jwtToken = localStorage.getItem('jwtToken') || "";
   const repeat = expense.periodicity ?? 1
   const response = await fetch(`${API_BASE}/payment/repeat/${repeat}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Authorization: `Bearer ${jwtToken}`,
     },
     body: JSON.stringify(expense),
   })
@@ -158,12 +171,13 @@ export async function createExpense(expense: ExpensePayload, token: string): Pro
 }
 
 export async function deleteExpense(expenseId: number, token: string): Promise<void> {
+  const jwtToken = localStorage.getItem('jwtToken') || "";
   const url = `${API_BASE}/payment/${expenseId}`
   const response = await fetch(url, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
+      Authorization: `Bearer ${jwtToken}`,
     },
   })
   if (!response.ok) {

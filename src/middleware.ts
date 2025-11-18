@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 
 const publicRoutes = [
-  { path: '/register', whenAuthenticated: 'redirect' },
+  { path: '/login', whenAuthenticated: 'redirect' },
   // {path: '/pricing', whenAuthenticated: 'next'}, // caso o usuario possa acessar mesmo autenticado
 ] as const
 
-const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = '/register'
+const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = '/login'
 
 function decodeJwt(token: string) {
   try {
@@ -72,6 +72,6 @@ export function middleware(request: NextRequest) {
 }
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
